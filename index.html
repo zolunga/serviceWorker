@@ -8,5 +8,13 @@
         <a href="dos.html"><button>X</button></a>
     </body>
 </html>
+<script src="js/db.js"></script>
+<script>
+    if (!window.indexedDB) {
+        window.alert("Su navegador no soporta una versión estable de indexedDB. Tal y como las características no serán validas");
+    } else {
+        startDB();
+    }
+</script>
 <script src="js/start.js"></script>
 <script src="js/check.js"></script>
