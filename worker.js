@@ -1,23 +1,24 @@
 const expectedCaches = ['static-v2'];
-self.addEventListener('install', event => {
-    console.log('V1 installing…');
-
-    // cache a cat SVG
-    event.waitUntil(
-        caches.open('static-v2').then(cache => {
-            return cache.addAll([
-            '/',
-            'images/img2.jpg',
-            'images/img1.jpg',
-            'js/check.js',
-            'js/start.js',
-            'index.html',
-            'dos.html',
-            ]).then(() => self.skipWaiting())
-        }
-        )
-    );
-});
+function installSW(){
+    self.addEventListener('install', event => {
+        console.log('V2 installing…');
+        event.waitUntil(
+            caches.open('static-v2').then(cache => {
+                    return cache.addAll([
+                        '/',
+                        'images/img2.jpg',
+                        'images/img1.jpg',
+                        'js/check.js',
+                        'js/start.js',
+                        'js/db.js',
+                        'index.html',
+                        'dos.html',
+                    ]).then(() => self.skipWaiting())
+                }
+            )
+        );
+    });
+}
 
 self.addEventListener('activate', event => {
     // delete any caches that aren't in expectedCaches
@@ -43,21 +44,21 @@ self.addEventListener('fetch', event => {
     // serve the cat SVG from the cache if the request is
     // same-origin and the path is '/dog.svg'
     console.log(url.pathname + '==' + 'images/img1.jpg');
+    /*
     if (url.pathname.localeCompare('/images/img1.jpg') === 0) {
-        console.log(true);
         event.respondWith(caches.match('images/img2.jpg'));
     }
     if (url.pathname.localeCompare('/index.html') === 0) {
-        console.log(true);
         event.respondWith(caches.match('index.html'));
     }
     if (url.pathname.localeCompare('/js/check.js') === 0) {
-        console.log(true);
         event.respondWith(caches.match('js/check.js'));
     }
     if (url.pathname.localeCompare('/js/start.js') === 0) {
-        console.log(true);
         event.respondWith(caches.match('js/start.js'));
     }
+
+     */
+    event.respondWith(caches.match(url.pathname))
 });
 

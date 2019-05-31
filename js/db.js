@@ -1,55 +1,79 @@
-const customerData = [
-    { ssn: "444-44-4444", name: "Bill", age: 35, email: "bill@company.com" },
-    { ssn: "555-55-5555", name: "Donna", age: 32, email: "donna@home.org" }
-];
 let day = new Date();
 function startDB() {
     day.setHours(0,0,0,0);
-    let request = window.indexedDB.open("TestDay", 1);
+    let request = window.indexedDB.open("TestDay2", 1);
     request.onerror = function(event) {
         console.log('error DB');
     };
     request.onupgradeneeded = function(event) {
         let db = event.target.result;
         // Se crea un almacén para contener la información de nuestros cliente
-        // Se usará "ssn" como clave ya que es garantizado que es única
         let objectStore = db.createObjectStore("dayaccess", {keyPath: "index"});
-
-        // Se crea un índice para buscar clientes por nombre. Se podrían tener duplicados
-        // por lo que no se puede usar un índice único.
         objectStore.createIndex("date", "date", {unique: false});
         objectStore.createIndex("status", "status", {unique: false});
         console.log("....");
     };
     read();
-    modifyReg();
-    getAllStore();
+    //modifyReg();
+    //getAllStore();
     //AddOther();
 }
 
 function read() {
-    let request = window.indexedDB.open("TestDay", 1);
+    let request = window.indexedDB.open("TestDay2", 1);
     request.onsuccess = function(event) {
         let db = event.target.result;
-        let transaction = db.transaction(["customers"]);
-        let ObjectStore = transaction.objectStore('customers');
-        let res = ObjectStore.get('444-44-4444');
-        res.onsuccess = () => console.log(res.result);
+        let transaction = db.transaction(["dayaccess"]);
+        let ObjectStore = transaction.objectStore('dayaccess');
+        console.log(ObjectStore);
+        let res = ObjectStore.get(1);
+        res.onsuccess = () => {
+            if(res.result === undefined){
+                console.log(res.result);
+                installSW();
+                AddDate();
+            } else {
+                console.log("fecha existente!");
+                console.log(res.result);
+                let dateCompare = (new Date());
+                dateCompare.setHours(0,0,0,0);
+                if (dateCompare.getTime() === res.result.date) {
+                    console.log("No es necesario actualizar")
+                } else {
+                    console.log("Actualizando...");
+                    modifyReg();
+                    installSW();
+                }
+            }
+        };
         res.onerror = () => console.log("No se pudo exraer");
     };
 }
 
-function modifyReg() {
-    let request = window.indexedDB.open("Test4", 5);
+function AddDate() {
+    let request = window.indexedDB.open("TestDay2", 1);
     request.onsuccess = function(event) {
         let db = event.target.result;
-        let transaction = db.transaction(["customers"], 'readwrite');
-        let ObjectStore = transaction.objectStore('customers');
-        let res = ObjectStore.get('444-44-4444');
+        let transaction = db.transaction(["dayaccess"], 'readwrite');
+        let ObjectStore = transaction.objectStore('dayaccess');
+        let value = {index: 1, date: new Date().setHours(0,0,0,0), status: true};
+        let Add = ObjectStore.add(value);
+        Add.onerror = () => console.log('Agregado');
+        Add.onsuccess = () => console.log('Error Agregando!');
+    };
+}
+
+
+function modifyReg() {
+    let request = window.indexedDB.open("TestDay2", 1);
+    request.onsuccess = function(event) {
+        let db = event.target.result;
+        let transaction = db.transaction(["dayaccess"], 'readwrite');
+        let ObjectStore = transaction.objectStore('dayaccess');
+        let res = ObjectStore.get(1);
         res.onsuccess = () => {
             let value = res.result;
-            value.date = '20';
-            console.log(value);
+            value.date = new Date().setHours(0,0,0,0);
             let update = ObjectStore.put(value);
             update.onerror = () => console.log('ErrorActulizando');
             update.onsuccess = () => console.log('Actualizado!');
@@ -81,11 +105,6 @@ function AddOther() {
         let db = event.target.result;
         // Create another object store called "names" with the autoIncrement flag set as true.
         let objStore = db.createObjectStore("names", {autoIncrement: true});
-
-        // Because the "names" object store has the key generator, the key for the name value is generated automatically.
-        // The added records would be like:
-        // key : 1 => value : "Bill"
-        // key : 2 => value : "Donna"
         for (let i in customerData) {
             objStore.add(customerData[i].name);
             console.log('Agregado' + customerData[i].name);
