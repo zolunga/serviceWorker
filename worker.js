@@ -8,9 +8,11 @@ self.addEventListener('install', event => {
                     'images/img2.jpg',
                     'images/img1.jpg',
                     'js/check.js',
+                    'js/jquery.js',
                     'js/start.js',
                     'js/db.js',
                     'js/database.js',
+                    'js/prueba.js',
                     'index.html',
                     'dos.html',
                 ]).then(() => self.skipWaiting())

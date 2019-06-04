@@ -6,32 +6,24 @@ function DB () {
         window.alert("Su navegador no soporta una versión estable de indexedDB.");
     } else {
         console.log("instalando DB");
-        let tem_idb = new Database('TestDBJ', 1);
+        idb = new Database('Test4', 1);
         let promise = new Promise((resolve, reject) => {
-            let status = tem_idb.getInstanceDB();
-            if (status) {
-                resolve(tem_idb);
-            } else {
-                reject(false)
-            }
+            let status = idb.getInstanceDB();
+            setTimeout(() => {
+                if (status) {
+                    resolve(status);
+                } else {
+                    reject(false)
+                }
+            }, 500);
         });
         console.log(promise);
         promise
-            .then((tem_idb) => {
-                idb = tem_idb;
-                setTimeout(() => idb.checkDay(), 500)
-            })
-            .catch(
-                (problem) => console.log(problem)
-            );
+            .then(() => {idb.checkDay()})
+            .catch((problem) => console.log(problem));
     }
 }
 
-function updateData() {
-    if (idb.need_update) {
-        // solicitar datos y actualizar BD
-    }
-}
 
 navigator.serviceWorker.register('../worker.js').then(reg => {
     reg.installing; // the installing worker, or undefined
@@ -55,4 +47,3 @@ navigator.serviceWorker.register('../worker.js').then(reg => {
         });
     });
 });
-

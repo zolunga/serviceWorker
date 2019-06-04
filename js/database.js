@@ -4,19 +4,19 @@ class Database {
     versionDB = undefined;
     need_update = false;
 
-    constructor(name, version){
+    constructor(name, version) {
         this.nameDB = name;
         this.versionDB = version;
     }
 
-    async getInstanceDB () {
+    async getInstanceDB() {
         let request = window.indexedDB.open(this.nameDB, this.versionDB);
         let ref = this;
-        request.onsuccess = async function(event) {
+        request.onsuccess = async function (event) {
             ref.db = await event.target.result;
             return true;
         };
-        request.onupgradeneeded = async function(event) {
+        request.onupgradeneeded = async function (event) {
             ref.db = await event.target.result;
             // Se crea un almacén para contener la información de nuestros cliente
             let objectStore1 = ref.db.createObjectStore("dayaccess", {keyPath: "index"});
@@ -27,9 +27,14 @@ class Database {
             objectStore2.createIndex("name", "name", {unique: false});
             objectStore2.createIndex("json", "json", {unique: false});
             console.log("coleccion json ok");
+            let objectStore3 = ref.db.createObjectStore("prueba", {keyPath: "id", autoIncrement: true});
+            objectStore3.createIndex("datoA", "datoA", {unique: false});
+            objectStore3.createIndex("datoB", "datoB", {unique: false});
+            objectStore3.createIndex("datoC", "datoC", {unique: false});
+            console.log("coleccion prueba ok");
             return true
         };
-        request.onerror = function(event) {
+        request.onerror = function (event) {
             console.log('error DB');
             return false;
         };
@@ -45,14 +50,14 @@ class Database {
         let ObjectStore = transaction.objectStore('dayaccess');
         let res = ObjectStore.get(1);
         res.onsuccess = () => {
-            if(res.result === undefined){
+            if (res.result === undefined) {
                 this.addJson({clave: 40, ubicacion: 'Z', lat: 2, lng: 4});
                 this.addDay();
             } else {
                 console.log("fecha existente!");
                 console.log(res.result);
                 let dateCompare = (new Date());
-                dateCompare.setHours(0,0,0,0);
+                dateCompare.setHours(0, 0, 0, 0);
                 if (dateCompare.getTime() === res.result.date) {
                     console.log("No es necesario actualizar");
                     this.getJson();
@@ -84,7 +89,7 @@ class Database {
         let res = ObjectStore.get(1);
         res.onsuccess = () => {
             let value = res.result;
-            value.date = new Date().setHours(0,0,0,0);
+            value.date = new Date().setHours(0, 0, 0, 0);
             let update = ObjectStore.put(value);
             update.onerror = () => console.log('Error Actulizando');
             update.onsuccess = () => {
@@ -109,7 +114,7 @@ class Database {
         let ObjectStore = transaction.objectStore('json');
         let res = ObjectStore.get(3);
         res.onsuccess = () => {
-            if(res.result !== undefined){
+            if (res.result !== undefined) {
                 console.log("Json existente!");
                 console.log(res.result);
                 return res.result;
@@ -118,5 +123,27 @@ class Database {
         res.onerror = () => console.log("No se pudo exraer");
     }
 
+    addDataPrueba(reg) {
+        let transaction = this.db.transaction(["prueba"], 'readwrite');
+        let ObjectStore = transaction.objectStore('prueba');
+        let Add = ObjectStore.add(reg);
+        Add.onerror = () => console.log('Error Ingresando');
+        Add.onsuccess = () => console.log('Dato ingresado');
+    }
 
+    getDataPrueba() {
+        let transaction = this.db.transaction(["prueba"]);
+        let ObjectStore = transaction.objectStore('prueba');
+        let res = ObjectStore.openCursor();
+        let ret = [];
+        res.onsuccess = (event) => {
+            let cursor = event.target.result;
+            if (cursor) {
+                ret.push(cursor.value);
+                cursor.continue();
+            }
+        };
+        res.onerror = () => console.log("No se pudo exraer");
+        return ret
+    }
 }
