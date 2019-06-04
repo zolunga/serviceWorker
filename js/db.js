@@ -30,7 +30,7 @@ function read() {
         res.onsuccess = () => {
             if(res.result === undefined){
                 console.log(res.result);
-                installSW();
+                //installSW();
                 AddDate();
             } else {
                 console.log("fecha existente!");
@@ -42,7 +42,7 @@ function read() {
                 } else {
                     console.log("Actualizando...");
                     modifyReg();
-                    installSW();
+                    //installSW();
                 }
             }
         };

@@ -6,15 +6,12 @@
     <body>
         <h1>sw</h1>
         <a href="dos.html"><button>X</button></a>
+        <div id="info">
+
+        </div>
     </body>
 </html>
 <script src="js/db.js"></script>
-<script>
-    if (!window.indexedDB) {
-        window.alert("Su navegador no soporta una versión estable de indexedDB. Tal y como las características no serán validas");
-    } else {
-        startDB();
-    }
-</script>
+<script src="js/database.js"></script>
 <script src="js/start.js"></script>
 <script src="js/check.js"></script>
